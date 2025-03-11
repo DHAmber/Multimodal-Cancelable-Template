@@ -73,25 +73,7 @@ def generate_user_seed_matrix(seed, feature_length):
 
 
 def apply_cancelable_transform(features, seed_matrix):
-    return features #features * seed_matrix
-
-
-def create_cnn_model_old(input_shape, num_users, template_size):
-    model = Sequential([
-        Input(shape=input_shape),
-        Conv2D(64, (1, 3), activation='sigmoid', padding='same'),
-        Dropout(0.5),
-        MaxPooling2D((1, 2), padding='same'),
-        Conv2D(64, (1, 3), activation='sigmoid', padding='same'),
-        Dropout(0.5),
-        MaxPooling2D((1, 2), padding='same'),
-        Flatten(),
-        Dense(128, activation='sigmoid'),
-        Dense(template_size, activation='sigmoid'),
-        Dense(num_users, activation='softmax')
-    ])
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-    return model
+    return features * seed_matrix
 
 def create_cnn_model(input_shape, num_users, template_size):
     model = Sequential([
@@ -118,54 +100,6 @@ def create_cnn_model(input_shape, num_users, template_size):
     ])
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
     return model
-
-
-def create_cnn_model_2(input_shape,num_users, template_size):
-    """
-    Create a CNN model to encrypt biometric data into a binary string.
-
-    Parameters:
-    - input_shape: Tuple representing the shape of input biometric data (e.g., (height, width, channels)).
-    - template_size: Length of the desired binary string output (e.g., 256 bits).
-
-    Returns:
-    - model: Compiled Keras model.
-    """
-    model = Sequential([
-        Input(shape=input_shape),
-
-        # Feature extraction layers
-        Conv2D(32, (3, 3), activation='relu', padding='same'),
-        MaxPooling2D((2, 2), padding='same'),
-        Dropout(0.3),
-
-        Conv2D(64, (3, 3), activation='relu', padding='same'),
-        MaxPooling2D((2, 2), padding='same'),
-        Dropout(0.3),
-
-        Conv2D(128, (3, 3), activation='relu', padding='same'),
-        MaxPooling2D((2, 2), padding='same'),
-        Dropout(0.3),
-
-        # Flatten the feature maps
-        Flatten(),
-
-        # Dense layers to reduce to template size
-        Dense(512, activation='relu'),
-        Dropout(0.5),
-        Dense(template_size, activation='sigmoid'),  # Output layer for binary string
-
-        # Thresholding to enforce binary output (0 or 1)
-        Lambda(lambda x: tf.round(x))  # Rounds to 0 or 1
-    ])
-
-    # Compile the model
-    model.compile(optimizer='adam',
-                  loss='binary_crossentropy',  # Suitable for binary output
-                  metrics=['accuracy'])
-
-    return model
-
 
 def generate_cancelable_template(features, cnn_model):
     total_elements = features.size
@@ -412,7 +346,7 @@ print('Enrollment Start')
 start_time=time.time()
 enroll_users()
 end_time=time.time()
-print(f'Total time to enroll 100 User : {end_time-start_time}')
+print(f'Total time to enroll User : {end_time-start_time}')
 print('Enrollment Complete. Preparing Test Query')
 start_time=time.time()
 generate_test_query()
